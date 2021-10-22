@@ -1,10 +1,10 @@
 ;;;; tiny-routes.asd
 
 (asdf:defsystem #:tiny-routes
-  :description "Describe tiny-routes here"
-  :author "Your Name <your.name@example.com>"
-  :license  "Specify license here"
+  :description "A tiny routing library for Common Lisp targeting Clack."
+  :author "Johnny Ruiz <johnny@ruiz-usa.com>"
   :version "0.0.1"
+  :license  "BSD 3-Clause"
   :serial t
   :components ((:file "package")
-               (:file "tiny-routes")))
+               (:file "response")))
