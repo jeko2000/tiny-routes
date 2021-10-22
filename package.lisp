@@ -29,4 +29,22 @@
    #:text/html
    #:unauthorized
    #:unprocessable-entity
-   ))
+   ;; request helpers
+   #:clack.io
+   #:clack.streaming
+   #:content-length
+   #:content-type
+   #:headers
+   #:path-info
+   #:path-params
+   #:query-string
+   #:raw-body
+   #:remote-addr
+   #:remote-port
+   #:request-method
+   #:request-uri
+   #:script-name
+   #:server-name
+   #:server-port
+   #:server-protocol
+   #:url-scheme))
