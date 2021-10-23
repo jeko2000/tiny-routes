@@ -83,3 +83,11 @@ REQUEST and evaluate BODY."
 (defun path-params (request &optional default)
   "Return the path params from REQUEST or DEFAULT."
   (getf request :path-params default))
+
+(defun path-param (request key &optional default)
+  "Return the path param value from REQUEST associated with KEY or DEFAULT."
+  (let* ((params (path-params request))
+         (pair (assoc key params :test #'string=)))
+    (if pair
+        (cdr pair)
+        default)))

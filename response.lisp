@@ -31,21 +31,21 @@
 
 ;; util
 ;; 2xx responses
-(defun ok (&key headers body)
-  "Return a response with status HTTP 200 OK, HEADERS, and BODY."
-  (make-response 200 :headers headers :body body))
+(defun ok (&optional body)
+  "Return a response with status HTTP 200 OK and body BODY."
+  (make-response 200 :body body))
 
-(defun created (&key headers body)
-  "Return a response with status HTTP 201 Created, HEADERS, and BODY."
-  (make-response 201 :headers headers :body body))
+(defun created (&optional body)
+  "Return a response with status HTTP 201 Created and body BODY."
+  (make-response 201 :body body))
 
-(defun accepted (&key headers body)
-  "Return a response with status HTTP 202 Accepted, HEADERS, and BODY."
-  (make-response 202 :headers headers :body body))
+(defun accepted (&optional body)
+  "Return a response with status HTTP 202 Accepted and body BODY."
+  (make-response 202 :body body))
 
-(defun no-content (&key headers)
-  "Return a response with status HTTP 204 No Content and HEADERS."
-  (make-response 204 :headers headers))
+(defun no-content ()
+  "Return a response with status HTTP 204 No Content."
+  (make-response 204))
 
 ;; 3xx responses
 (defun found (location)
@@ -58,38 +58,38 @@ of LOCATION."
   `(found ,location))
 
 ;; 4xx responses
-(defun bad-request (&key headers body)
-  "Return a response with status HTTP 204 No Content and HEADERS."
-  (make-response 400 :headers headers :body body))
+(defun bad-request (&optional body)
+  "Return a response with status HTTP 400 Bad Request and body BODY."
+  (make-response 400 :body body))
 
-(defun unauthorized (&key headers body)
-  "Return a response with status HTTP 401 Unauthorized, HEADERS, and BODY."
-  (make-response 401 :headers headers :body body))
+(defun unauthorized (&optional body)
+  "Return a response with status HTTP 401 Unauthorized and body BODY."
+  (make-response 401 :body body))
 
-(defun forbidden (&key headers body)
-  "Return a response with status HTTP 403 Forbidden, HEADERS, and BODY."
-  (make-response 403 :headers headers :body body))
+(defun forbidden (&optional body)
+  "Return a response with status HTTP 403 Forbidden and body BODY."
+  (make-response 403 :body body))
 
-(defun not-found (&key headers body)
-  "Return a response with status HTTP 404 Not Found, HEADERS, and BODY."
-  (make-response 404 :headers headers :body body))
+(defun not-found (&optional body)
+  "Return a response with status HTTP 404 Not Found and body BODY."
+  (make-response 404 :body body))
 
-(defun method-not-allowed (&key headers body)
-  "Return a response with status HTTP 405 Method Not Allowed, HEADERS, and BODY."
-  (make-response 405 :headers headers :body body))
+(defun method-not-allowed (&optional body)
+  "Return a response with status HTTP 405 Method Not Allowed and body BODY."
+  (make-response 405 :body body))
 
-(defun unprocessable-entity (&key headers body)
-  "Return a response with status HTTP 422 Unprocessable Entity, HEADERS, and BODY."
-  (make-response 422 :headers headers :body body))
+(defun unprocessable-entity (&optional body)
+  "Return a response with status HTTP 422 Unprocessable Entity and body BODY."
+  (make-response 422 :body body))
 
 ;; 5xx responses
-(defun internal-server-error (&key headers body)
-  "Return a response with status HTTP 500 Internal Server Error, HEADERS, and BODY."
-  (make-response 500 :headers headers :body body))
+(defun internal-server-error (&optional body)
+  "Return a response with status HTTP 500 Internal Server Error and body BODY."
+  (make-response 500 :body body))
 
-(defun not-implemented (&key headers body)
-  "Return a response with status HTTP 500 Not Implemented, HEADERS, and BODY."
-  (make-response 501 :headers headers :body body))
+(defun not-implemented (&optional body)
+  "Return a response with status HTTP 500 Not Implemented and body BODY."
+  (make-response 501 :body body))
 
 ;; helpers
 (defun status (response status)
@@ -97,14 +97,14 @@ of LOCATION."
   (make-response
    status
    :headers (response-headers response)
-   :body (response-body body)))
+   :body (response-body response)))
 
 (defun headers (response headers)
   "Return a clone of RESPONSE with headers HEADERS."
   (make-response
    (response-status response)
    :headers headers
-   :body (response-body body)))
+   :body (response-body response)))
 
 (defun body (response body)
   "Return a clone of RESPONSE with body BODY."
