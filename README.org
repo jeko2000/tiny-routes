@@ -1,0 +1,116 @@
+#+TITLE:     TINY-ROUTES
+#+AUTHOR:    Johnny Ruiz
+#+EMAIL:     johnny@ruiz-usa.com
+#+DESCRIPTION: A tiny routing library for Common Lisp targeting Clack
+#+LANGUAGE:  en
+#+OPTIONS:   H:4 num:nil toc:2 p:t
+** Introduction
+   TINY-ROUTES is a bare-bones routing library for [[https://lisp-lang.org][Common Lisp]]
+   targeting the [[https://github.com/fukamachi/clack.git][Clack]] web application development. Its only external
+   dependency is [[http://edicl.github.io/cl-ppcre/][CL-PPCRE]] which is used to match and bind dynamic URL
+   parameters.
+.
+** Prerequisites
+   The following lists the prerequisites needed to follow this
+   [[https://github.com/jeko2000/tiny-routes/blob/main/README.org][README]] successfully.
+
+   1) [[https://lispcookbook.github.io/cl-cookbook/web.html][Common Lisp web frameworks]]
+      + In particular, [[http://edicl.github.io/hunchentoot/][Hunchentoot]] and [[https://github.com/fukamachi/clack.git][Clack]].
+   2) [[https://developer.mozilla.org/en-US/docs/Web/HTTP][HTTP]]
+      + Specifically, you should be familiar with [[https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods][HTTP methods]].
+   3) [[https://www.quicklisp.org/beta/][Quicklisp]]
+      + Ideally, you should have [[https://www.quicklisp.org/beta/#installation][Quicklisp installed]] and read through
+        its [[https://www.quicklisp.org/beta/][documentation]].
+
+** Motivation
+   [[https://github.com/fukamachi/clack.git][Clack]]'s killer feature is that it allows us server-agnostic web
+   application. Namely, web applications that are not tied to a
+   specific server library such as [[http://edicl.github.io/hunchentoot/][Hunchentoot]], [[https://github.com/gigamonkey/toot][Toot]], or [[https://github.com/orthecreedence/wookie][Wookie]].
+
+   Clack distills a web application down to just a =handler= function
+   that accepts a =request= (or an =environment=) object (i.e., a
+   [[https://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node108.html][plist]] containing data like HTTP request method, request URI, among
+   others) and returns an appropriate HTTP response. This HTTP
+   response is represented simply by a list of three elements
+   containing the HTTP status code, HTTP headers, and a response body.
+
+   This simplification provides developers with a great amount of
+   flexibility given that we can leverage the entire power of lisp to
+   create these simple list structures representing HTTP responses.
+   However, I quickly found that [[https://github.com/fukamachi/clack.git][Clack]]' itself does not offer tools or
+   guidance on how such request =handler= functions should be written,
+   composed, and ultimately managed.
+
+   The purpose of TINY-ROUTES is to provide a small set of
+   helper/utility functions and macros to aid the developer in
+   building clack applications by breaking them up into composable
+   request handlers and middleware functions.
+
+** Definitions
+   The following represents definitions used in this document.
+
+   + Handler :: A function that accepts a request (or environment)
+     object and returning either a) nil or 2) a list of the from (list
+     http-status headers-lisp (body)) (e.g., '(200 (:content-type
+     "text/plain") ("Hello world"))).
+   + Middleware :: A function that accepts a handler as its first
+     argument, optionally accepts other arguments, and returns a
+     potentially different handler.
+
+** Usage
+   The following application exposes:
+   + A static endpoint which returns an HTTP 200 response with the body
+     =alive=
+   + A dynamic endpoint which returns an HTTP 200 response with a
+     string containing the bound value =account-
+   + A catch-all handler which returns an HTTP 404 response with the
+     body =not-found=.
+   #+begin_src common-lisp
+(defparameter *app*
+  (routes                                                      ; (1)
+   (route-get "/" ()                                           ; (2)
+              (ok "alive"))                                             ; (3)
+
+   (route-get "/accounts/:account-id" (request)                ; (4)
+              (let ((account-id (path-param request "account-id")))     ; (5)
+                (ok (format nil "Your account id: ~a." account-id))))   ; (6)
+
+   (route-any "*" ()                                           ; (7)
+              (not-found "not-found"))))                                ; (8)
+   #+end_src
+   Each line in the example is detailed below
+   1) The =routes= function accepts a variable number of handlers and
+      returns a new handler that loops through each handler and
+      returns the first non-nil response it finds.
+   2) The =route-get= macro creates a handler that matches on HTTP GET
+      requests. The macro accepts a =path-template= and a request
+      binding. Please note TINY-ROUTES also exposes similar macros for
+      POST, PUT, HEADER, HEAD, and OPTIONS.
+   3) The =ok= function accepts an optional body and returns a
+      response list with HTTP status 200 OK.
+   4) The =router-get= macro now receives a path-template with a
+      dynamic parameter named =:account-id=. This value associated
+      with this dynamic parameter is made available as part of the
+      request's path-params as seen in line (5).
+   5) The =path-param= selector function can be used to quickly parse
+      a path param from a request object.
+   6) We leverage the =format= function to show that the response body
+      can also be dynamic.
+   7) The =route-any= macro can be used to implement _catch all_
+      routes.
+   8) The =not-found= function accepts an optional body and returns a
+      response list with HTTP status 404 Not Found.
+
+** Installation
+   To install, please navigate to a directory where your [[https://www.quicklisp.org/beta/][Quicklisp]]
+   installation expects local packages (e.g.,
+   ~/quicklisp/local-projects) and clone this repository as follows:
+   #+begin_src sh
+https://github.com/jeko2000/tiny-routes.git
+   #+end_src
+   Then fire up your CL implementation of choice and load the library via
+   via Quicklisp as follows:
+   #+begin_src common-lisp
+(ql:quickload :tiny-routes)
+   #+end_src
+   Enjoy!
