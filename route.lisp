@@ -1,35 +1,6 @@
 ;;;; path.lisp
 (in-package #:tiny-routes)
 
-(defun %wrap-route-matches-method (handler method)
-  "Return HANDLER if METHOD is nil or `:any'. Otherwise, wrap
-HANDLER such that it is called only if the request method is `eq' to
-METHOD."
-  (if (or (null method) (eq method :any))
-      handler
-      (lambda (request)
-        (when (eq method (request-method request))
-          (funcall handler request)))))
-
-(defun %wrap-route-matches-path-template (handler path-template)
-  "Wrap HANDLER such that it is called only if the request path info
-matches PATH-TEMPLATE."
-  (let ((matcher (make-path-template-matcher path-template)))
-    (lambda (request)
-      (let ((matches (funcall matcher (path-info request))))
-        (cond ((null matches)
-               nil)
-              ((consp matches)
-               (funcall handler (append (list :path-params matches) request)))
-              (t
-               (funcall handler request)))))))
-
-(defun %wrap-route-matches (handler method path-template)
-  (%wrap-route-matches-method
-   (%wrap-route-matches-path-template
-    handler path-template)
-   method))
-
 (defmacro route (method path-template req-binding &body body)
   (let ((handler-form
           (if (null req-binding)
@@ -39,7 +10,10 @@ matches PATH-TEMPLATE."
                    ,@body))
               `(lambda ,req-binding
                  ,@body))))
-    `(%wrap-route-matches ,handler-form ,method ,path-template)))
+    `(wrap-request-matches-method
+      (wrap-request-matches-path-template
+       ,handler-form ,path-template)
+      ,method)))
 
 (defmacro route-get (path-template req-binding &body body)
   `(route :get ,path-template ,req-binding ,@body))
@@ -68,3 +42,7 @@ returns the first non-nil response. Otherwise, return nil."
   (lambda (request)
     (loop for handler in handlers
           when (funcall handler request) return it)))
+
+(defmacro defroutes (name &rest handlers)
+  "Define a route handler from ROUTES"
+  `(defparameter ,name (routes ,@handlers)))

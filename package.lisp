@@ -16,6 +16,9 @@
    #:raw-body
    #:remote-addr
    #:remote-port
+   #:request-append
+   #:request-body
+   #:request-get
    #:request-method
    #:request-uri
    #:script-name
@@ -24,7 +27,7 @@
    #:server-protocol
    #:url-scheme
    #:with-request-slots
-   ;; response helpers
+   ;; response
    #:accepted
    #:application/json
    #:bad-request
@@ -37,6 +40,7 @@
    #:headers
    #:internal-server-error
    #:make-response
+   #:map-body
    #:method-not-allowed
    #:no-content
    #:not-found
@@ -56,7 +60,12 @@
    #:*path-token-scanner*
    #:make-path-template-matcher
    #:make-regex-path-matcher
+   ;; middleware
+   #:wrap-request-body
+   #:wrap-request-matches-method
+   #:wrap-request-matches-path-template
    ;; route
+   #:defroutes
    #:route
    #:route-any
    #:route-delete

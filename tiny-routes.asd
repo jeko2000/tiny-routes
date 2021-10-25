@@ -8,7 +8,9 @@
   :serial t
   :depends-on (:cl-ppcre)
   :components ((:file "package")
+               (:file "util")
                (:file "request")
                (:file "response")
                (:file "path")
+               (:file "middleware")
                (:file "route")))

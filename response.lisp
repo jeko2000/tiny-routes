@@ -117,7 +117,15 @@ of LOCATION."
   "Return a clone of RESPONSE with header KEY and VALUE added."
   (headers
    response
-   (append (list key value) (response-headers response))))
+   (plist-append (response-headers response) key value)))
+
+(defun map-body (response body-mapper)
+  "Return a clone of RESPONSE where body is mapped via BODY-MAPPER."
+  (make-response
+   (response-status response)
+   :headers (response-headers response)
+   :body (funcall body-mapper (response-body response))))
+
 
 (defun content-type (response content-type)
   "Return a clone of RESPONSE with CONTENT-TYPE."

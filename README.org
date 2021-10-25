@@ -69,14 +69,14 @@
 (defparameter *app*
   (routes                                                      ; (1)
    (route-get "/" ()                                           ; (2)
-              (ok "alive"))                                             ; (3)
+     (ok "alive"))                                             ; (3)
 
    (route-get "/accounts/:account-id" (request)                ; (4)
-              (let ((account-id (path-param request "account-id")))     ; (5)
-                (ok (format nil "Your account id: ~a." account-id))))   ; (6)
+     (let ((account-id (path-param request "account-id")))     ; (5)
+       (ok (format nil "Your account id: ~a." account-id))))   ; (6)
 
    (route-any "*" ()                                           ; (7)
-              (not-found "not-found"))))                                ; (8)
+     (not-found "not-found"))))                                ; (8)
    #+end_src
    Each line in the example is detailed below
    1) The =routes= function accepts a variable number of handlers and
