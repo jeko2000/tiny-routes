@@ -1,6 +1,7 @@
 ;;;; package.lisp
 
 (defpackage #:tiny-routes
+  (:nicknames :tiny)
   (:use #:cl)
   (:export
    ;; request
