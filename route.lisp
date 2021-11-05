@@ -10,10 +10,9 @@
                    ,@body))
               `(lambda ,req-binding
                  ,@body))))
-    `(wrap-request-matches-method
-      (wrap-request-matches-path-template
-       ,handler-form ,path-template)
-      ,method)))
+    `(pipe ,handler-form
+       (wrap-request-matches-path-template ,path-template)
+       (wrap-request-matches-method ,method))))
 
 (defmacro route-get (path-template req-binding &body body)
   `(route :get ,path-template ,req-binding ,@body))
@@ -43,6 +42,6 @@ returns the first non-nil response. Otherwise, return nil."
     (loop for handler in handlers
           when (funcall handler request) return it)))
 
-(defmacro defroutes (name &rest handlers)
+(defmacro define-routes (name &body handlers)
   "Define a route handler from ROUTES"
   `(defparameter ,name (routes ,@handlers)))

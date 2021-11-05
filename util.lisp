@@ -1,6 +1,16 @@
 ;;;; util.lisp
 (in-package #:tiny-routes)
 
+(defmacro pipe (value &body wrappers)
+  "Pipe VALUE through WRAPPERS by subsequently passing each wrapped
+value as the first parameter of the next wrapper."
+  (reduce
+   (lambda (w1 w2)
+     (let ((w2 (cond ((symbolp w2) `(,w2))
+                     (t w2))))
+       `(,(car w2) ,w1 ,@(cdr w2))))
+   wrappers :initial-value value))
+
 (defun plist-append (plist key value)
   "Return a clone of PLIST containing KEY and VALUE."
   (append (list key value) plist))

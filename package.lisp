@@ -4,56 +4,60 @@
   (:nicknames :tiny)
   (:use #:cl)
   (:export
+   ;; util
+   #:pipe
+   #:read-stream-to-string
    ;; request
-   #:clack.io
-   #:clack.streaming
-   #:content-length
-   #:content-type
-   #:headers
-   #:path-info
-   #:path-param
-   #:path-params
-   #:query-string
-   #:raw-body
-   #:remote-addr
-   #:remote-port
    #:request-append
    #:request-body
+   #:request-clack.io
+   #:request-clack.streaming
+   #:request-content-length
+   #:request-content-type
    #:request-get
+   #:request-header
+   #:request-headers
    #:request-method
+   #:request-path-info
+   #:request-path-param
+   #:request-path-params
+   #:request-query-string
+   #:request-raw-body
+   #:request-remote-address
+   #:request-remote-port
+   #:request-script-name
+   #:request-server-name
+   #:request-server-port
+   #:request-server-protocol
    #:request-uri
-   #:script-name
-   #:server-name
-   #:server-port
-   #:server-protocol
-   #:url-scheme
+   #:request-url-scheme
    #:with-request-slots
    ;; response
    #:accepted
-   #:application/json
+   #:application/json-response
    #:bad-request
-   #:body
-   #:content-type
+   #:body-mapper-response
+   #:body-response
+   #:content-type-response
    #:created
    #:forbidden
-   #:found
-   #:header
-   #:headers
+   #:header-response
+   #:headers-response
+   #:headers-response-append
    #:internal-server-error
    #:make-response
-   #:map-body
    #:method-not-allowed
    #:no-content
    #:not-found
    #:not-implemented
    #:ok
-   #:redirect
+   #:redireect
    #:response-body
    #:response-headers
    #:response-status
    #:responsep
-   #:status
-   #:text/html
+   #:status-response
+   #:text/html-response
    #:unauthorized
    #:unprocessable-entity
    ;; path
@@ -65,8 +69,16 @@
    #:wrap-request-body
    #:wrap-request-matches-method
    #:wrap-request-matches-path-template
+   #:response-mapper
+   #:wrap-response-mapper
+   #:wrap-response-status
+   #:wrap-response-header
+   #:wrap-response-headers
+   #:wrap-response-headers-append
+   #:wrap-response-content-type
+   #:wrap-response-body
    ;; route
-   #:defroutes
+   #:define-routes
    #:route
    #:route-any
    #:route-delete
