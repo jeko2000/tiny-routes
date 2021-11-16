@@ -112,7 +112,7 @@ of LOCATION and body BODY."
 headers."
   (make-response
    (response-status response)
-   (append headers (response-headers headers))
+   (append headers (response-headers response))
    (response-body response)))
 
 (defun body-response (response body)
