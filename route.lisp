@@ -11,6 +11,7 @@
               `(lambda ,req-binding
                  ,@body))))
     `(pipe ,handler-form
+       (wrap-middleware)
        (wrap-request-matches-path-template ,path-template)
        (wrap-request-matches-method ,method))))
 

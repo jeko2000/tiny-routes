@@ -66,17 +66,21 @@
    #:make-path-template-matcher
    #:make-regex-path-matcher
    ;; middleware
+   #:wrap-middleware
+   #:wrap-post-match-middleware
    #:wrap-request-body
+   #:wrap-request-mapper
    #:wrap-request-matches-method
    #:wrap-request-matches-path-template
-   #:response-mapper
-   #:wrap-response-mapper
-   #:wrap-response-status
+   #:wrap-request-predicate
+   #:wrap-response-body
+   #:wrap-response-content-type
    #:wrap-response-header
    #:wrap-response-headers
    #:wrap-response-headers-append
-   #:wrap-response-content-type
-   #:wrap-response-body
+   #:wrap-response-mapper
+   #:wrap-response-mapper*
+   #:wrap-response-status
    ;; route
    #:define-routes
    #:route

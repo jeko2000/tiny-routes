@@ -1,6 +1,65 @@
 ;;;; request.lisp
 (in-package #:tiny-routes)
 
+;; Middleware helpers
+(defun wrap-request-predicate (handler request-predicate)
+  "Wrap HANDLER such that it is called if request satisfies
+REQUEST-PREDICATE."
+  (lambda (request)
+    (when (funcall request-predicate request)
+      (funcall handler request))))
+
+(defun wrap-request-mapper (handler request-mapper)
+  "Wrap HANDLER such that it is called with the result of applying
+REQUEST-HANDLER to the incoming request if not-nil. Otherwise, return
+nil."
+  (lambda (request)
+    (let ((clone (funcall request-mapper request)))
+      (when clone
+        (funcall handler clone)))))
+
+(defun wrap-response-mapper* (handler response-mapper)
+  "Like `wrap-response-mapper' but pass RESPONSE-MAPPER should be a
+function accepting both request and response."
+  (lambda (request)
+    (let ((response (funcall handler request)))
+      (typecase response
+        (null nil)
+        (cons (funcall response-mapper request response))
+        (function
+         (lambda (responder)
+          (funcall response (lambda (res)
+                              (funcall responder
+                                       (funcall response-mapper request res))))))))))
+
+(defun wrap-response-mapper (handler response-mapper)
+  "Wrap HANDLER such that it returns the result of applying
+RESPONSE-MAPPER to response."
+  (lambda (request)
+    (let ((response (funcall handler request)))
+      (typecase response
+        (null nil)
+        (cons (funcall response-mapper response))
+        (function
+         (lambda (responder)
+          (funcall response (lambda (res)
+                              (funcall responder
+                                       (funcall response-mapper res))))))))))
+
+(defun wrap-middleware (handler)
+  "Wrap HANDLER such that any post-match middleware is wrapped"
+  (lambda (request)
+    (let ((middleware (request-get request :post-match-middleware #'identity)))
+      (funcall (funcall middleware handler) request))))
+
+(defun wrap-post-match-middleware (handler middleware)
+  "Wrap HANDLER such that MIDDLEWARE is wrapped after the request is
+matched."
+  (lambda (request)
+    (let ((mw (request-get request :post-match-middleware #'identity)))
+      (funcall handler (request-append request :post-match-middleware
+                                       (compose mw middleware))))))
+
 ;; request middleware
 (defun wrap-request-matches-method (handler method)
   "Return HANDLER if METHOD is nil or `:any'. Otherwise, wrap
@@ -8,9 +67,7 @@ HANDLER such that it is called only if the request method is `eq' to
 METHOD."
   (if (or (null method) (eq method :any))
       handler
-      (lambda (request)
-        (when (eq method (request-method request))
-          (funcall handler request)))))
+      (wrap-request-predicate handler (lambda (req) (eq (request-method req) method)))))
 
 (defun wrap-request-matches-path-template (handler path-template)
   "Return HANDLER if PATH-TEMPLATE is nil or the string \"*\".
@@ -40,21 +97,6 @@ available to the request via `:request-body'."
                    (request-append request :request-body request-body)))))))
 
 ;; response middleware
-(defun response-mapper (handler request response-mapper)
-  (let ((response (funcall handler request)))
-    (typecase response
-      (cons
-       (funcall response-mapper response))
-      (function
-       (lambda (responder)
-        (funcall response (lambda (res)
-                            (funcall responder (funcall response-mapper res))))))
-      (t response))))
-
-(defun wrap-response-mapper (handler response-mapper)
-  (lambda (request)
-    (response-mapper handler request response-mapper)))
-
 (defun wrap-response-status (handler status)
   "Wrap HANDLER such that the response's status is set to STATUS."
   (wrap-response-mapper handler (lambda (res) (status-response res status))))

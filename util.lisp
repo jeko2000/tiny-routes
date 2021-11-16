@@ -22,3 +22,10 @@ value as the first parameter of the next wrapper."
       (loop for pos = (read-sequence buf input-stream)
             while (plusp pos)
             do (write-sequence buf output-stream :end pos)))))
+
+(defun compose (function &rest other-functions)
+  (reduce (lambda (f g)
+            (lambda (&rest args)
+              (funcall f (apply g args))))
+          other-functions
+          :initial-value function))
