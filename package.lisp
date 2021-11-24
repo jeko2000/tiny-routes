@@ -82,13 +82,13 @@
    #:wrap-response-mapper*
    #:wrap-response-status
    ;; route
+   #:define-any
+   #:define-delete
+   #:define-get
+   #:define-head
+   #:define-options
+   #:define-post
+   #:define-put
+   #:define-route
    #:define-routes
-   #:route
-   #:route-any
-   #:route-delete
-   #:route-get
-   #:route-head
-   #:route-options
-   #:route-post
-   #:route-put
    #:routes))

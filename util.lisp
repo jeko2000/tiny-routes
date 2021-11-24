@@ -6,9 +6,12 @@
 value as the first parameter of the next wrapper."
   (reduce
    (lambda (w1 w2)
-     (let ((w2 (cond ((symbolp w2) `(,w2))
-                     (t w2))))
-       `(,(car w2) ,w1 ,@(cdr w2))))
+     (cond ((null w1) w2)
+           ((null w2) w1)
+           (t
+            (let ((w2 (cond ((symbolp w2) `(,w2))
+                            (t w2))))
+              `(,(car w2) ,w1 ,@(cdr w2))))))
    wrappers :initial-value value))
 
 (defun plist-append (plist key value)

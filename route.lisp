@@ -1,7 +1,7 @@
 ;;;; path.lisp
 (in-package #:tiny-routes)
 
-(defmacro route (method path-template req-binding &body body)
+(defmacro prepare-route (method path-template req-binding &body body)
   (let ((handler-form
           (if (null req-binding)
               (let ((req (gensym)))
@@ -12,29 +12,34 @@
                  ,@body))))
     `(pipe ,handler-form
        (wrap-middleware)
-       (wrap-request-matches-path-template ,path-template)
-       (wrap-request-matches-method ,method))))
+       ,(when path-template
+          `(wrap-request-matches-path-template ,path-template))
+       ,(when (and method (not (eq method :any)))
+          `(wrap-request-matches-method ,method)))))
 
-(defmacro route-get (path-template req-binding &body body)
-  `(route :get ,path-template ,req-binding ,@body))
+(defmacro define-route (req-binding &body body)
+  `(prepare-route nil nil ,req-binding ,@body))
 
-(defmacro route-post (path-template req-binding &body body)
-  `(route :post ,path-template ,req-binding ,@body))
+(defmacro define-get (path-template req-binding &body body)
+  `(prepare-route :get ,path-template ,req-binding ,@body))
 
-(defmacro route-put (path-template req-binding &body body)
-  `(route :put ,path-template ,req-binding ,@body))
+(defmacro define-post (path-template req-binding &body body)
+  `(prepare-route :post ,path-template ,req-binding ,@body))
 
-(defmacro route-delete (path-template req-binding &body body)
-  `(route :delete ,path-template ,req-binding ,@body))
+(defmacro define-put (path-template req-binding &body body)
+  `(prepare-route :put ,path-template ,req-binding ,@body))
 
-(defmacro route-head (path-template req-binding &body body)
-  `(route :head ,path-template ,req-binding ,@body))
+(defmacro define-delete (path-template req-binding &body body)
+  `(prepare-route :delete ,path-template ,req-binding ,@body))
 
-(defmacro route-options (path-template req-binding &body body)
-  `(route :options ,path-template ,req-binding ,@body))
+(defmacro define-head (path-template req-binding &body body)
+  `(prepare-route :head ,path-template ,req-binding ,@body))
 
-(defmacro route-any (path-template req-binding &body body)
-  `(route :any ,path-template ,req-binding ,@body))
+(defmacro define-options (path-template req-binding &body body)
+  `(prepare-route :options ,path-template ,req-binding ,@body))
+
+(defmacro define-any (path-template req-binding &body body)
+  `(prepare-route :any ,path-template ,req-binding ,@body))
 
 (defun routes (&rest handlers)
   "Return a handler which itself calls each handler in HANDLERS and
