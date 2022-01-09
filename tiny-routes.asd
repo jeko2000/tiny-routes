@@ -14,3 +14,12 @@
                              (:file "middleware")
                              (:file "tiny-routes"))))
   :in-order-to ((test-op (test-op :tiny-routes/test))))
+
+(asdf:defsystem :tiny-routes/test
+  :description "A tiny-routes test suite."
+  :author "Johnny Ruiz <johnny@ruiz-usa.com>"
+  :license  "BSD 3-Clause"
+  :depends-on (:tiny-routes :fiveam)
+  :pathname "t/"
+  :components ((:file "tiny-routes-test"))
+  :perform (test-op (o c) (symbol-call :5a :run! :tiny-routes)))
