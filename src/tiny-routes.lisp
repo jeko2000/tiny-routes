@@ -1,5 +1,57 @@
-;;;; path.lisp
-(in-package #:tiny-routes)
+;;;; route.lisp
+
+;;; A route is just a handler wrapped with middleware to allow it to
+;;; `match' a given request by HTTP method and or request URI.
+;;;
+;;; Routes also add support for `post-match' middleware which are
+;;; middleware called after the HTTP method and request URI is
+;;; matched.
+
+(in-package :cl-user)
+(uiop:define-package :tiny-routes
+  (:use :cl)
+  (:nicknames :tiny)
+  (:import-from :uiop #:if-let)
+  (:use-reexport
+   :tiny-routes.request
+   :tiny-routes.response
+   :tiny-routes.middleware)
+  (:export #:wrap-middleware-internal
+           #:wrap-post-match-middleware
+           #:define-route
+           #:define-get
+           #:define-post
+           #:define-put
+           #:define-delete
+           #:define-head
+           #:define-options
+           #:define-any
+           #:routes
+           #:define-routes))
+
+(in-package :tiny-routes)
+
+(defun compose (function &rest other-functions)
+  (reduce (lambda (f g)
+            (lambda (&rest args)
+              (funcall f (apply g args))))
+          other-functions
+          :initial-value function))
+
+(defun wrap-middleware-internal (handler)
+  "Wrap HANDLER such that post-match handlers are called."
+  (lambda (request)
+    (if-let ((post-match-middleware (request-get request :post-match-middleware)))
+      (funcall (funcall post-match-middleware handler) request)
+      (funcall handler request))))
+
+(defun wrap-post-match-middleware (handler middleware)
+  "Wrap HANDLER such that MIDDLEWARE is wrapped after the request is
+matched."
+  (lambda (request)
+    (let ((mw (request-get request :post-match-middleware #'identity)))
+      (funcall handler (request-append request :post-match-middleware
+                                       (compose mw middleware))))))
 
 (defmacro prepare-route (method path-template req-binding &body body)
   (let ((handler-form
@@ -11,7 +63,7 @@
               `(lambda ,req-binding
                  ,@body))))
     `(pipe ,handler-form
-       (wrap-middleware)
+       (wrap-middleware-internal)
        ,(when path-template
           `(wrap-request-matches-path-template ,path-template))
        ,(when (and method (not (eq method :any)))

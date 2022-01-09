@@ -9,7 +9,7 @@
    targeting the [[https://github.com/fukamachi/clack.git][Clack]] web application development. Its only external
    dependency is [[http://edicl.github.io/cl-ppcre/][CL-PPCRE]] which is used to match and bind dynamic URL
    parameters.
-.
+
 ** Prerequisites
    The following lists the prerequisites needed to follow this
    [[https://github.com/jeko2000/tiny-routes/blob/main/README.org][README]] successfully.
@@ -49,13 +49,26 @@
 ** Definitions
    The following represents definitions used in this document.
 
-   + Handler :: A function that accepts a request (or environment)
-     object and returning either a) nil or 2) a list of the from (list
-     http-status headers-lisp (body)) (e.g., '(200 (:content-type
-     "text/plain") ("Hello world"))).
-   + Middleware :: A function that accepts a handler as its first
-     argument, optionally accepts other arguments, and returns a
-     potentially different handler.
+   + =request= or =environemnt= :: A plist representing an HTTP
+     request. Please see [[https://github.com/fukamachi/clack.git][Clack]] for a list of supported fields.
+     Finally, please note that users and/or middleware are allowed
+     (and encouraged!) to add new fields to the request object for new
+     functionality.
+
+   + =response= :: A list or lambda representing an HTTP response. Per
+     the [[https://github.com/fukamachi/clack.git][Clack]] documentation, a response can either be:
+      1) A list of three elements representing an HTTP status code,
+         HTTP headers, and a response body
+
+      2) A lambda accepting a =response= function to be called with a
+         =response= asynchronously.
+
+   + =handler= :: A function that accepts a =request= and returns a
+     =response= or nil.
+
+   + =middleware= :: A combinator function that accepts a handler as
+     its first argument, optionally accepts other arguments, and
+     returns a potentially different handler.
 
 ** Usage
    The following application exposes:
