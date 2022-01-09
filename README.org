@@ -79,29 +79,26 @@
    + A catch-all handler which returns an HTTP 404 response with the
      body =not-found=.
    #+begin_src common-lisp
-(defparameter *app*
-  (routes                                                      ; (1)
-   (route-get "/" ()                                           ; (2)
-     (ok "alive"))                                             ; (3)
-
-   (route-get "/accounts/:account-id" (request)                ; (4)
-     (let ((account-id (path-param request "account-id")))     ; (5)
-       (ok (format nil "Your account id: ~a." account-id))))   ; (6)
-
-   (route-any "*" ()                                           ; (7)
-     (not-found "not-found"))))                                ; (8)
+(define-routes *app*                                          ; (1)
+  (define-get "/" ()                                          ; (2)
+    (ok "alive"))                                             ; (3)
+  (define-get "/accounts/:account-id" (request)               ; (4)
+    (let ((account-id (path-param request :account-id)))      ; (5)
+      (ok (format nil "Your account id: ~a." account-id))))   ; (6)
+  (define-any "*" ()                                          ; (7)
+    (not-found "not-found")))                                 ; (8)
    #+end_src
    Each line in the example is detailed below
-   1) The =routes= function accepts a variable number of handlers and
-      returns a new handler that loops through each handler and
+   1) The =define-routes= macro accepts a variable number of handlers
+      and returns a new handler that loops through each handler and
       returns the first non-nil response it finds.
-   2) The =route-get= macro creates a handler that matches on HTTP GET
+   2) The =define-get= macro creates a handler that matches on HTTP GET
       requests. The macro accepts a =path-template= and a request
       binding. Please note TINY-ROUTES also exposes similar macros for
       POST, PUT, HEADER, HEAD, and OPTIONS.
    3) The =ok= function accepts an optional body and returns a
       response list with HTTP status 200 OK.
-   4) The =router-get= macro now receives a path-template with a
+   4) The =define-get= macro now receives a path-template with a
       dynamic parameter named =:account-id=. This value associated
       with this dynamic parameter is made available as part of the
       request's path-params as seen in line (5).
@@ -109,7 +106,7 @@
       a path param from a request object.
    6) We leverage the =format= function to show that the response body
       can also be dynamic.
-   7) The =route-any= macro can be used to implement _catch all_
+   7) The =define-any= macro can be used to implement _catch all_
       routes.
    8) The =not-found= function accepts an optional body and returns a
       response list with HTTP status 404 Not Found.
