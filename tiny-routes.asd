@@ -22,4 +22,4 @@
   :depends-on (:tiny-routes :fiveam)
   :pathname "t/"
   :components ((:file "tiny-routes-test"))
-  :perform (test-op (o c) (symbol-call :5a :run! :tiny-routes)))
+  :perform (test-op (o c) (symbol-call :tiny-routes-test :run-tests)))

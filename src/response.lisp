@@ -57,9 +57,9 @@
         (if (stringp body) (list body) body)))
 
 ;;; 2xx responses
-(defun ok (&key headers body)
+(defun ok (&optional body)
   "Return a response with status HTTP 200 OK and BODY."
-  (make-response :status 200 :headers headers :body body))
+  (make-response :status 200 :body body))
 
 (defun created (location &optional body)
   "Return a response with status HTTP 201 Created with a location header

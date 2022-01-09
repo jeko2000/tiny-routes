@@ -8,6 +8,9 @@
 (def-suite tiny-routes
   :description "The top-level testing suite for tiny-routes.")
 
+(defun run-tests ()
+  (run! 'tiny-routes))
+
 (def-suite* request :in tiny-routes)
 
 (test request-test
