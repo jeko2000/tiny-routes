@@ -59,7 +59,7 @@
     (is (string= "test" (response-header response :server)))
     (is (string= "CREATED" (response-body response)))))
 
-(def-suite* response :in tiny-routes)
+(def-suite* middleware :in tiny-routes)
 
 (defun get-request-p (request)
   (eq :get (request-method request)))
@@ -77,7 +77,7 @@
     (is (equalp response (funcall (wrap-request-matches-method handler :get) request)))
     (is (null (funcall (wrap-request-matches-method handler :post) request)))
     (is (equalp response (funcall (wrap-request-matches-path-template handler "/:page") request)))
-    (is (equalp response (funcall (wrap-request-matches-path-template handler "/two/:level") request)))))
+    (is (null (funcall (wrap-request-matches-path-template handler "/two/:level") request)))))
 
 (defun echo-handler (request)
   (make-response :status 200 :body request))
@@ -92,3 +92,23 @@
       (is (equalp '(:user-id "jeko")
                   (path-params (response-body (funcall (wrap-request-matches-path-template #'echo-handler "/users/:user-id")
                                                        request))))))))
+
+(def-suite* routes :in tiny-routes)
+
+(defun mock-request (method uri &optional body)
+  (let ((request (make-request :request-method method
+                               :request-uri uri)))
+    (if body
+        (with-input-from-string (in body)
+          (request-append request :raw-body in))
+        request)))
+
+(test route-matching0
+  (let ((request (mock-request :post "/foo"))
+        (response (make-response :status 200 :body "OK")))
+    (is (null (funcall (define-get "/foo" () response) request)))
+    (is (null (funcall (define-put "/foo" () response) request)))
+    (is (null (funcall (define-delete "/foo" () response) request)))
+    (is (null (funcall (define-post "/bar" () response) request)))
+    (is (equalp response (funcall (define-post "/foo" () response) request)))
+    (is (equalp response (funcall (define-post "/:foo" () response) request)))))

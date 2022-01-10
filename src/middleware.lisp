@@ -7,8 +7,6 @@
 (in-package :cl-user)
 (uiop:define-package :tiny-routes.middleware
   (:use :cl)
-  (:import-from :uiop
-                #:if-let)
   (:import-from :tiny-routes.request
                 #:request-append
                 #:request-method
@@ -111,7 +109,7 @@ METHOD."
       handler
       (wrap-request-predicate handler (lambda (req) (eq (request-method req) method)))))
 
-(defun make-path-matcher (path-template)
+(defun make-regex-path-matcher (path-template)
   "Return a closure that accepts a path and returns an alist of matched
 groups if path matches PATH-TEMPLATE.
 
@@ -140,6 +138,17 @@ against \"/users/1042\" returns `(:user-id \"jeko\")'."
               collect (intern (string-upcase name) :keyword)
               collect value)))))))
 
+(defun make-path-matcher (path-template)
+  "Return a closure that accepts a path and returns non-nil if path
+matches PATH-TEMPLATE."
+  (cond ((or (string= "*" path-template) (string= "/*" path-template))
+         (constantly t))
+        ((find #\: path-template)
+         (make-regex-path-matcher path-template))
+        (t
+         (lambda (path)
+           (string= path path-template)))))
+
 (defun wrap-request-matches-path-template (handler path-template)
   "Return HANDLER if PATH-TEMPLATE is nil or the string \"*\".
 Otherwise, wrap HANDLER such that it is called only if the request
@@ -149,9 +158,10 @@ matched params to the request via `:path-params'."
       handler
       (let ((matcher (make-path-matcher path-template)))
         (lambda (request)
-          (if-let ((matches (funcall matcher (path-info request))))
-            (funcall handler (request-append request :path-params matches))
-            (funcall handler request))))))
+          (let ((matches (funcall matcher (path-info request))))
+            (cond ((null matches) nil)
+                  ((consp matches) (funcall handler (request-append request :path-params matches)))
+                  (t (funcall handler request))))))))
 
 (defun read-stream-to-string (input-stream)
   "Read INPUT-STREAM entirely and return the contents as a string."
