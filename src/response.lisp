@@ -34,6 +34,11 @@
 ;;; Refinements
 (defun responsep (object)
   "Return t if OBJECT is a response."
+  (or (synchronous-response-p object)
+      (asynchronous-response-p object)))
+
+(defun synchronous-response-p (object)
+  "Return t if OBJECT is a synchronous response."
   (when (listp object)
     (destructuring-bind (status headers body &rest others) object
       (and (null others)
@@ -46,6 +51,10 @@
              (vector t)
              (pathname t)
              (otherwise nil))))))
+
+(defun asynchronous-response-p (object)
+  "Return t if OBJECT is a synchronous response."
+  (functionp object))
 
 (deftype response ()
   '(satisfies responsep))
