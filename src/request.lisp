@@ -25,9 +25,7 @@
            #:clack.io
            #:request-headers
            #:request-header
-           #:path-params
            #:request-body
-           #:path-param
            #:request-append))
 
 (in-package :tiny-routes.request)
@@ -69,11 +67,21 @@
                   args)))
 
 ;;; Selectors
-(defmacro with-request (lambda-list request &body body)
-  "Bind the variables in LAMBDA-LIST to the corresponding values in
-REQUEST and evaluate BODY."
-  `(destructuring-bind (&key ,@lambda-list &allow-other-keys) ,request
-     ,@body))
+(defmacro with-request (request-vars request &body body)
+  "Bind the variables in REQUEST-VARS to the corresponding values in
+REQUEST and evaluate BODY. Each var in REQUEST-VARS can either be a
+symbol or a list in the form (variable-name keyword-name
+[default-value])."
+  (let ((grequest (gensym "request")))
+    `(let ((,grequest ,request))
+       (let ,(mapcar (lambda (var)
+                       (multiple-value-bind (symbol name default)
+                           (etypecase var
+                             (symbol (values var var nil))
+                             (list (values (first var) (second var) (third var))))
+                         `(,symbol (getf ,grequest ,(intern (symbol-name name) :keyword) ,default))))
+              request-vars)
+         ,@body))))
 
 (defun request-get (request key &optional default)
   "Return the value associated with KEY in REQUEST or DEFAULT."
@@ -152,18 +160,9 @@ REQUEST and evaluate BODY."
   (let ((headers (request-headers request)))
     (gethash key headers default)))
 
-(defun path-params (request &optional default)
-  "Return the path params from REQUEST or DEFAULT."
-  (request-get request :path-params default))
-
 (defun request-body (request &optional default)
   "Return the request body from REQUEST or DEFAULT."
   (request-get request :request-body default))
-
-(defun path-param (request key &optional default)
-  "Return the path param value from REQUEST associated with KEY or DEFAULT."
-  (let* ((params (path-params request)))
-    (getf params key default)))
 
 ;;; Combinations
 (defun request-append (request key value)

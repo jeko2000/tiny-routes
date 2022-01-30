@@ -26,6 +26,8 @@
            #:wrap-response-mapper*
            #:pipe
            #:wrap-request-matches-method
+           #:path-parameter-get
+           #:with-path-parameters
            #:make-path-matcher
            #:wrap-request-matches-path-template
            #:wrap-request-body)
@@ -138,6 +140,18 @@ against \"/users/1042\" returns `(:user-id \"jeko\")'."
               collect (intern (string-upcase name) :keyword)
               collect value)))))))
 
+(defun path-parameter-get (path-parameters key &optional default)
+  "Return the value associated with KEY in PATH-PARAMETERS or DEFAULT."
+  (getf path-parameters key default))
+
+(defmacro with-path-parameters (vars path-parameters &body body)
+  "Bind the variables in VARS to the corresponding values present
+in PATH-PARAMETERS."
+  (let ((gpath-parameters (gensym "path-parameters")))
+    `(let* ((,gpath-parameters ,path-parameters))
+       (destructuring-bind (&key ,@vars &allow-other-keys) ,gpath-parameters
+         ,@body))))
+
 (defun make-path-matcher (path-template)
   "Return a closure that accepts a path and returns non-nil if path
 matches PATH-TEMPLATE."
@@ -153,14 +167,14 @@ matches PATH-TEMPLATE."
   "Return HANDLER if PATH-TEMPLATE is nil or the string \"*\".
 Otherwise, wrap HANDLER such that it is called only if the request
 path info matches PATH-TEMPLATE. If PATH-TEMPLATE is dynamic, add the
-matched params to the request via `:path-params'."
+matched params to the request via `:path-parameters'."
   (if (or (null path-template) (string= "*" path-template))
       handler
       (let ((matcher (make-path-matcher path-template)))
         (lambda (request)
           (let ((matches (funcall matcher (path-info request))))
             (cond ((null matches) nil)
-                  ((consp matches) (funcall handler (request-append request :path-params matches)))
+                  ((consp matches) (funcall handler (request-append request :path-parameters matches)))
                   (t (funcall handler request))))))))
 
 (defun read-stream-to-string (input-stream)
