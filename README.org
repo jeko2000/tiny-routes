@@ -123,4 +123,10 @@ git clone https://github.com/jeko2000/tiny-routes.git
    #+begin_src common-lisp
 (ql:quickload :tiny-routes)
    #+end_src
+
+** Sample code
+   Please see [[https://github.com/jeko2000/tiny-routes-realworld-example-app][tiny-routes-realworld-example-app]] for a full-fledged
+   [[https://github.com/fukamachi/clack.git][Clack]] REST application demonstrating one possible use of
+   [[https://github.com/jeko2000/tiny-routes/][tiny-routes]].
+
    Enjoy!
