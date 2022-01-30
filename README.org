@@ -116,7 +116,7 @@
    installation expects local packages (e.g.,
    ~/quicklisp/local-projects) and clone this repository as follows:
    #+begin_src sh
-https://github.com/jeko2000/tiny-routes.git
+git clone https://github.com/jeko2000/tiny-routes.git
    #+end_src
    Then fire up your CL implementation of choice and load the library via
    via Quicklisp as follows:
