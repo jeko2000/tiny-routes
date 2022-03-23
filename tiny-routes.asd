@@ -7,12 +7,21 @@
   :license  "BSD 3-Clause"
   :serial t
   :depends-on (:cl-ppcre :uiop)
-  :components ((:module "src"
+  :pathname "src/"
+  :depends-on (:cl-ppcre)
+  :components ((:file "util")
+               (:file "request")
+               (:file "response")
+               (:module "middleware"
                 :serial t
-                :components ((:file "request")
+                :components ((:file "builder")
+                             (:file "method")
+                             (:file "path-template")
+                             (:file "query-parameters")
+                             (:file "request-body")
                              (:file "response")
-                             (:file "middleware")
-                             (:file "tiny-routes"))))
+                             (:file "middleware")))
+               (:file "tiny-routes"))
   :in-order-to ((test-op (test-op :tiny-routes/test))))
 
 (asdf:defsystem :tiny-routes/test

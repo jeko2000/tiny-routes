@@ -16,7 +16,7 @@
 (test request-test
   (let* ((request (make-request
                    :request-uri "/home" :request-method :post
-                   :url-scheme "https" :path-params '(:key "value")
+                   :url-scheme "https" :path-parameters '(:key "value")
                    :content-type "text/plain" :foo 42))
          (request2 (request-append request :bar :baz)))
     (is (requestp request))
@@ -24,7 +24,7 @@
     (is (string= "/home" (path-info request)))
     (is (eq :post (request-method request)))
     (is (string= "https" (url-scheme request)))
-    (is (string= "value" (path-param request :key)))
+    (is (string= "value" (getf (request-get request :path-parameters) :key)))
     (is (string= "text/plain" (content-type request)))
     (is (= 42 (request-get request :foo)))
     (is (eq :baz (request-get request2 :bar)))
@@ -92,8 +92,9 @@
                    (request-get (response-body (funcall (wrap-request-body #'echo-handler) request))
                                 :request-body)))
       (is (equalp '(:user-id "jeko")
-                  (path-params (response-body (funcall (wrap-request-matches-path-template #'echo-handler "/users/:user-id")
-                                                       request))))))))
+                  (request-get (response-body (funcall (wrap-request-matches-path-template #'echo-handler "/users/:user-id")
+                                                       request))
+                               :path-parameters))))))
 
 (def-suite* routes :in tiny-routes)
 
