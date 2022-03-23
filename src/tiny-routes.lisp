@@ -15,7 +15,8 @@
   (:use-reexport
    :tiny-routes.request
    :tiny-routes.response
-   :tiny-routes.middleware)
+   :tiny-routes.middleware
+   :tiny-routes.util)
   (:export #:wrap-middleware-internal
            #:wrap-post-match-middleware
            #:define-route
@@ -30,13 +31,6 @@
            #:define-routes))
 
 (in-package :tiny-routes)
-
-(defun compose (function &rest other-functions)
-  (reduce (lambda (f g)
-            (lambda (&rest args)
-              (funcall f (apply g args))))
-          other-functions
-          :initial-value function))
 
 (defun wrap-middleware-internal (handler)
   "Wrap HANDLER such that post-match handlers are called."

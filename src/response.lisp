@@ -153,17 +153,14 @@ BODY."
 ;;; Selectors
 (defun response-status (response)
   "Return the status of RESPONSE."
-  (declare (inline response-status))
   (first response))
 
 (defun response-headers (response)
   "Return the headers of RESPONSE."
-  (declare (inline response-headers))
   (second response))
 
 (defun response-header (response key &optional default)
   "Return the value of KEY from the headers of RESPONSE."
-  (declare (inline response-headers))
   (getf (response-headers response) key default))
 
 (defun response-body (response)
