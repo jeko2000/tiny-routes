@@ -10,16 +10,12 @@
   (:import-from :tiny-routes.request
                 #:request-append
                 #:request-method
-                #:request-get
                 #:raw-body
                 #:path-info)
   (:import-from :tiny-routes.response
-                #:append-header
-                #:status-response
-                #:headers-response
-                #:header-response
-                #:body-response
-                #:response-body)
+                #:response-body
+                #:response-headers
+                #:clone-response)
   (:export #:wrap-request-predicate
            #:wrap-request-mapper
            #:wrap-response-mapper
@@ -197,22 +193,24 @@ available to the request via `:request-body'."
 ;;; Response middleware
 (defun wrap-response-status (handler status)
   "Wrap HANDLER such that the response status is set to STATUS."
-  (wrap-response-mapper handler (lambda (res) (status-response res status))))
+  (wrap-response-mapper handler (lambda (res) (clone-response res :status status))))
 
 (defun wrap-response-header (handler key value)
   "Wrap HANDLER such that the response headers includes header with KEY and VALUE."
-  (wrap-response-mapper handler (lambda (res) (header-response res key value))))
+  (wrap-response-mapper
+   handler
+   (lambda (res) (clone-response res :headers (append (list key value) (response-headers res))))))
 
 (defun wrap-response-headers (handler headers)
   "Wrap HANDLER such that the response headers are set to HEADERS."
-  (wrap-response-mapper handler (lambda (res) (headers-response res headers))))
+  (wrap-response-mapper handler (lambda (res) (clone-response res :headers headers))))
 
 (defun wrap-response-content-type (handler content-type)
   "Wrap HANDLER such that the response content type is set to CONTENT-TYPE."
   (wrap-response-header handler :content-type content-type))
 
 (defun wrap-response-body (handler body)
-  (wrap-response-mapper handler (lambda (res) (body-response res body))))
+  (wrap-response-mapper handler (lambda (res) (clone-response res :body body))))
 
 (defun wrap-response-body-mapper (handler body-mapper)
   (wrap-response-mapper handler (lambda (res) (funcall body-mapper (response-body res)))))

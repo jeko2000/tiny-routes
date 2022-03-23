@@ -6,7 +6,7 @@
   :version "0.1.1"
   :license  "BSD 3-Clause"
   :serial t
-  :depends-on (:cl-ppcre)
+  :depends-on (:cl-ppcre :uiop)
   :components ((:module "src"
                 :serial t
                 :components ((:file "request")

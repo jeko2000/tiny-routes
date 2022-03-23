@@ -112,18 +112,10 @@
       response list with HTTP status 404 Not Found.
 
 ** Installation
-   To install, please navigate to a directory where your [[https://www.quicklisp.org/beta/][Quicklisp]]
-   installation expects local packages (e.g.,
-   ~/quicklisp/local-projects) and clone this repository as follows:
-   #+begin_src sh
-git clone https://github.com/jeko2000/tiny-routes.git
-   #+end_src
-   Then fire up your CL implementation of choice and load the library via
-   via Quicklisp as follows:
+   To install via [[https://www.quicklisp.org/beta/][quicklisp]] please run the following in your running REPL:
    #+begin_src common-lisp
-(ql:quickload :tiny-routes)
+(ql:quickload "tiny-routes")
    #+end_src
-
 ** Sample code
    Please see [[https://github.com/jeko2000/tiny-routes-realworld-example-app][tiny-routes-realworld-example-app]] for a full-fledged
    [[https://github.com/fukamachi/clack.git][Clack]] REST application demonstrating one possible use of
