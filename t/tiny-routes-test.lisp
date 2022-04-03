@@ -86,14 +86,19 @@
 
 (test middleware-test1
   (with-input-from-string (in "Sample request body stream")
-    (let* ((request (make-request :request-method :get :request-uri "/users/jeko" :raw-body in)))
+    (let* ((request (make-request :request-method :get :request-uri "/users/jeko" :raw-body in
+                                  :content-length 26)))
       (is (eq in (raw-body request)))
       (is (string= "Sample request body stream"
                    (request-get (response-body (funcall (wrap-request-body #'echo-handler) request))
                                 :request-body)))
+      (is (equalp '(413 nil nil)
+                  (funcall (wrap-request-body #'echo-handler :max-bytes 2) request)))
       (is (equalp '(:user-id "jeko")
-                  (request-get (response-body (funcall (wrap-request-matches-path-template #'echo-handler "/users/:user-id")
-                                                       request))
+                  (request-get (response-body
+                                (funcall
+                                 (wrap-request-matches-path-template #'echo-handler "/users/:user-id")
+                                 request))
                                :path-parameters))))))
 
 (def-suite* routes :in tiny-routes)
