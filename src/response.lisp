@@ -173,14 +173,12 @@ BODY."
         body)))
 
 ;;; Combinators
-(defun clone-response (response &rest args &key status headers body)
+(defun clone-response (response &key status headers body)
   "Return a clone of RESPONSE with the provided STATUS, HEADERS, and
 BODY."
-  (if (every #'null args)
-      response
-      (make-response :status (or status (response-status response))
-                     :headers (or headers (response-headers response))
-                     :body (or body (response-headers response)))))
+  (make-response :status (or status (response-status response))
+                 :headers (or headers (response-headers response))
+                 :body (or body (response-body response))))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (uiop:with-deprecation (:style-warning)

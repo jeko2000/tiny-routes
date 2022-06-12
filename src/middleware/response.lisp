@@ -11,6 +11,7 @@
   (:export #:wrap-response-status
            #:wrap-response-header
            #:wrap-response-headers
+           #:wrap-response-headers-append
            #:wrap-response-content-type
            #:wrap-response-body
            #:wrap-response-body-mapper))
@@ -30,6 +31,12 @@
 (defun wrap-response-headers (handler headers)
   "Wrap HANDLER such that the response headers are set to HEADERS."
   (wrap-response-mapper handler (lambda (res) (clone-response res :headers headers))))
+
+(defun wrap-response-headers-append (handler headers)
+  "Wrap HANDLER such that the response headers include HEADERS."
+  (wrap-response-mapper
+   handler
+   (lambda (res) (clone-response res :headers (append headers (response-headers res))))))
 
 (defun wrap-response-content-type (handler content-type)
   "Wrap HANDLER such that the response content type is set to CONTENT-TYPE."

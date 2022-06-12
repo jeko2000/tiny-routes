@@ -3,7 +3,8 @@
 (uiop:define-package :tiny-routes.util
   (:use :cl)
   (:export #:pipe
-           #:compose))
+           #:compose
+           #:rfc-1123-date))
 
 (in-package :tiny-routes.util)
 
@@ -26,3 +27,22 @@ the first parameter of the next wrapper."
               (funcall f (apply g args))))
           other-functions
           :initial-value function))
+
+(defvar *day-names*
+  #("Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun"))
+
+(defvar *month-names-3*
+  #("Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"))
+
+(defun rfc-1123-date (&optional (time (get-universal-time)))
+  (when time
+    (multiple-value-bind (second minute hour date month year day-of-week)
+        (decode-universal-time time 0)
+      (format nil "~A, ~2,'0d ~A ~4d ~2,'0d:~2,'0d:~2,'0d GMT"
+              (svref *day-names* day-of-week)
+              date
+              (svref *month-names-3* (1- month))
+              year
+              hour
+              minute
+              second))))
