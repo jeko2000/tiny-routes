@@ -120,3 +120,37 @@
     (is (null (funcall (define-post "/bar" () response) request)))
     (is (equalp response (funcall (define-post "/foo" () response) request)))
     (is (equalp response (funcall (define-post "/:foo" () response) request)))))
+
+(test route-matching1
+  (let ((request (mock-request :get "/accounts/A123/users/U42"))
+        (ok-response (make-response :status 200 :body "OK"))
+        (expected (list "A123" "U42")))
+    (is (equalp ok-response (funcall (define-any "*" () ok-response) request)))
+    (is (equalp expected
+                (funcall (define-get "/accounts/:account-id/users/:user-id" (request)
+                           (let ((account-id (path-parameter request :account-id))
+                                 (user-id (path-parameter request :user-id)))
+                             (list account-id user-id)))
+                         request)))
+    (is (equalp expected
+                (funcall (define-get "/accounts/:account-id/users/:user-id" (request)
+                           (with-request (path-parameters) request
+                             (with-path-parameters (account-id user-id) path-parameters
+                               (list account-id user-id))))
+                         request)))))
+
+(test readme-example
+  (let ((app (routes
+              (define-get "/" ()
+                (ok "alive"))
+              (define-get "/accounts/:account-id" (request)
+                (let ((account-id (path-parameter request :account-id)))
+                  (ok (format nil "Your account id: ~a." account-id))))
+              (define-any "*" ()
+                (not-found "not-found")))))
+    (is (equalp '(200 NIL ("alive"))
+                (funcall app (mock-request :get "/"))))
+    (is (equalp '(200 NIL ("Your account id: A123."))
+                (funcall app (mock-request :get "/accounts/A123"))))
+    (is (equalp '(404 NIL ("not-found"))
+                (funcall app (mock-request :get "/unknown"))))))

@@ -10,10 +10,13 @@
                 #:scan-to-strings)
   (:import-from :tiny-routes.request
                 #:request-append
+                #:request-get
                 #:path-info)
   (:import-from :tiny-routes.util
                 #:compose)
-  (:export #:wrap-request-path-info-matcher
+  (:export #:path-parameter
+           #:with-path-parameters
+           #:wrap-request-path-info-matcher
            #:wrap-request-matches-path-template))
 
 (in-package :tiny-routes.middleware.path-template)
@@ -87,15 +90,16 @@ then it is made available to the request under `:path-parameters'."
   "Wrap HANDLER such that it is called only if the request path matches
 the PATH-TEMPLATE.
 
-If PATH-TEMPLATE is t, nil, or an empty string, then return HANDLER
-unchanged.
+If PATH-TEMPLATE is t, nil, the empty string, or \"*\", then return
+HANDLER unchanged.
 
 If REGEX is non-nil, then interpret path-template as a regular
 expression."
   (check-type path-template (or symbol string))
   (cond ((or (null path-template)
              (eq path-template t)
-             (string= path-template ""))
+             (string= path-template "")
+             (string= path-template "*"))
          handler)
         ;; If regex is non-nil, then interpret path-info as a regex
         (regex
@@ -105,3 +109,15 @@ expression."
          (wrap-request-path-info-matcher handler (make-path-template-keyword-matcher path-template)))
         (t
          (wrap-request-path-info-matcher handler (make-path-template-exact-matcher path-template)))))
+
+(defun path-parameter (request path-parameter &optional default)
+  "Return the value mapped to PATH-PARAMETER from REQUEST or DEFAULT."
+  (getf (getf request :path-parameters) path-parameter default))
+
+(defmacro with-path-parameters (vars path-parameters &body body)
+  "Bind the variables in VARS to the corresponding values present in
+PATH-PARAMETERS."
+  (let ((gpath-parameters (gensym "path-parameters")))
+    `(let* ((,gpath-parameters ,path-parameters))
+       (destructuring-bind (&key ,@vars &allow-other-keys) ,gpath-parameters
+         ,@body))))

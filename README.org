@@ -83,7 +83,7 @@
   (define-get "/" ()                                          ; (2)
     (ok "alive"))                                             ; (3)
   (define-get "/accounts/:account-id" (request)               ; (4)
-    (let ((account-id (path-param request :account-id)))      ; (5)
+    (let ((account-id (path-parameter request :account-id)))  ; (5)
       (ok (format nil "Your account id: ~a." account-id))))   ; (6)
   (define-any "*" ()                                          ; (7)
     (not-found "not-found")))                                 ; (8)
