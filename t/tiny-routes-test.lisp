@@ -99,6 +99,12 @@
                                 (funcall
                                  (wrap-request-matches-path-template #'echo-handler "/users/:user-id")
                                  request))
+                               :path-parameters)))
+      (is (equalp '("jeko")
+                  (request-get (response-body
+                                (funcall
+                                 (wrap-request-matches-path-template #'echo-handler "/users/*")
+                                 request))
                                :path-parameters))))))
 
 (def-suite* routes :in tiny-routes)
@@ -137,8 +143,21 @@
                            (with-request (path-parameters) request
                              (with-path-parameters (account-id user-id) path-parameters
                                (list account-id user-id))))
-                         request)))))
+                         request)))
+    (is (equalp expected
+		(funcall (define-get "/accounts/*/users/*" (request)
+			   (with-request (path-parameters) request
+			     path-parameters))
+			 request)))))
 
+(test route-matching3
+  (let ((request (mock-request :get "/images/lena.jpg"))
+	(expected (list "lena" "jpg")))
+    (is (equalp expected
+		(funcall (define-get "/images/*.*" (request)
+			   (with-request (path-parameters) request
+			     path-parameters))
+			 request)))))
 (test readme-example
   (let ((app (routes
               (define-get "/" ()
