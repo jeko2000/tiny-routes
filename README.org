@@ -79,14 +79,17 @@
    + A catch-all handler which returns an HTTP 404 response with the
      body =not-found=.
    #+begin_src common-lisp
-(define-routes *app*                                          ; (1)
-  (define-get "/" ()                                          ; (2)
-    (ok "alive"))                                             ; (3)
-  (define-get "/accounts/:account-id" (request)               ; (4)
-    (let ((account-id (path-parameter request :account-id)))  ; (5)
-      (ok (format nil "Your account id: ~a." account-id))))   ; (6)
-  (define-any "*" ()                                          ; (7)
-    (not-found "not-found")))                                 ; (8)
+(define-routes *app*                                                ; (1)
+  (define-get "/" ()                                                ; (2)
+    (ok "alive"))                                                   ; (3)
+  (define-get "/accounts/:account-id" (request)                     ; (4)
+    (let ((account-id (path-parameter request :account-id)))        ; (5)
+      (ok (format nil "Your account id: ~a." account-id))))         ; (6)
+  (define-get "/images/*.*" (request)                               ; (7)
+    (with-request (path-parameters) request                         ; (8)
+      (ok (format nil "Image type: ~a." (cadr path-parameters)))))  ; (9)
+  (define-any "*" ()                                                ; (7)
+    (not-found "not-found")))                                       ; (8)
    #+end_src
    Each line in the example is detailed below
    1) The =define-routes= macro accepts a variable number of handlers
@@ -106,10 +109,17 @@
       a path param from a request object.
    6) We leverage the =format= function to show that the response body
       can also be dynamic.
-   7) The =define-any= macro can be used to implement _catch all_
-      routes.
-   8) The =not-found= function accepts an optional body and returns a
-      response list with HTTP status 404 Not Found.
+   7) The =define-get= macro can also receive path templates with
+      wildcards. The values matched with the wildcards are also made
+      available in the request's path-params.
+   8) The =with-request= macro makes it easy to destructure properties
+      of a request cleanly. Here we only fetch the path-params.
+   9) In this case the path-params is a list of all the values matched
+      with each wildcard in order.
+   10) The =define-any= macro can be used to implement _catch all_
+       routes.
+   11) The =not-found= function accepts an optional body and returns a
+       response list with HTTP status 404 Not Found.
 
 ** Installation
    To install via [[https://www.quicklisp.org/beta/][quicklisp]] please run the following in your running REPL:

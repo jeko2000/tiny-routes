@@ -70,7 +70,25 @@ matches the regex in PATH-TEMPLATE."
       ;; TODO: Consider returning the matched groups
       (and (scan template-scanner path) t))))
 
-;; TODO: Add a matcher to handle Sinatra's `splat'.
+(defun make-path-template-wildcard-matcher (path-template)
+  "Docstring"
+  (check-type path-template string)
+  (flet ((make-template-scanner (path-template)
+	   ;; Metacharacters need to be matched literally
+	   (let ((path-template-meta (ppcre:regex-replace-all "[.]"
+							      path-template
+							      "[.]")))
+	     (ppcre:create-scanner
+	      (concatenate 'string
+			   "^"
+			   (ppcre:regex-replace-all "[*]" path-template-meta "(.+)")
+			   "$")))))
+    (let ((template-scanner (make-template-scanner path-template)))
+      (lambda (path)
+	(let ((path-params
+		(nth-value 1 (ppcre:scan-to-strings template-scanner path))))
+	  (loop for i from 0 to (1- (length path-params))
+		collect (aref path-params i)))))))
 
 (defun wrap-request-path-info-matcher (handler path-info-matcher)
   "Wrap HANDLER such that it is called only if the result of applying
@@ -104,6 +122,8 @@ expression."
         ;; If regex is non-nil, then interpret path-info as a regex
         (regex
          (wrap-request-path-info-matcher handler (make-path-template-regex-matcher path-template)))
+	((find #\* path-template)
+	 (wrap-request-path-info-matcher handler (make-path-template-wildcard-matcher path-template)))
         ;; A `:' in the path template means it is a keyword template
         ((find #\: path-template)
          (wrap-request-path-info-matcher handler (make-path-template-keyword-matcher path-template)))

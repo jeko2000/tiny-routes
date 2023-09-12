@@ -99,6 +99,12 @@
                                 (funcall
                                  (wrap-request-matches-path-template #'echo-handler "/users/:user-id")
                                  request))
+                               :path-parameters)))
+      (is (equalp '("jeko")
+                  (request-get (response-body
+                                (funcall
+                                 (wrap-request-matches-path-template #'echo-handler "/users/*")
+                                 request))
                                :path-parameters))))))
 
 (def-suite* routes :in tiny-routes)
@@ -137,7 +143,12 @@
                            (with-request (path-parameters) request
                              (with-path-parameters (account-id user-id) path-parameters
                                (list account-id user-id))))
-                         request)))))
+                         request)))
+    (is (equalp expected
+		(funcall (define-get "/accounts/*/users/*" (request)
+			   (with-request (path-parameters) request
+			     path-parameters))
+			 request)))))
 
 (test readme-example
   (let ((app (routes
@@ -146,11 +157,16 @@
               (define-get "/accounts/:account-id" (request)
                 (let ((account-id (path-parameter request :account-id)))
                   (ok (format nil "Your account id: ~a." account-id))))
+	      (define-get "/images/*.*" (request)
+		(with-request (path-parameters) request
+		  (ok (format nil "Image type: ~a." (cadr path-parameters)))))
               (define-any "*" ()
                 (not-found "not-found")))))
     (is (equalp '(200 NIL ("alive"))
                 (funcall app (mock-request :get "/"))))
     (is (equalp '(200 NIL ("Your account id: A123."))
                 (funcall app (mock-request :get "/accounts/A123"))))
+    (is (equalp '(200 NIL ("Image type: jpg."))
+		(funcall app (mock-request :get "/images/lena.jpg"))))
     (is (equalp '(404 NIL ("not-found"))
                 (funcall app (mock-request :get "/unknown"))))))
