@@ -14,7 +14,7 @@
 (defvar *cookie3*
   (cookie:make-cookie
    :name "name3" :value "value3"
-   :expires (encode-universal-time 6 22 19 25 1 2002)
+   :expires (encode-universal-time 6 22 19 25 1 2002 0)
    :path "/"
    :domain "example.com"
    :secure-p t
@@ -23,7 +23,7 @@
 (defvar *cookie4*
   (cookie:make-cookie
    :name "name4" :value "value4"
-   :expires (encode-universal-time 6 22 19 25 1 2002)
+   :expires (encode-universal-time 6 22 19 25 1 2002 0)
    :path "/"
    :domain "example.com"
    :secure-p nil
@@ -62,7 +62,7 @@
          (response (funcall handler mock-request))
          (headers (tiny:response-headers response)))
     (is (= 4 (length headers)))
-    (is (string= "name3=value3; Expires=Sat, 26 Jan 2002 00:22:06 GMT; Path=/; Domain=example.com; Secure"
+    (is (string= "name3=value3; Expires=Fri, 25 Jan 2002 19:22:06 GMT; Path=/; Domain=example.com; Secure"
                  (second headers)))
-    (is (string= "name4=value4; Expires=Sat, 26 Jan 2002 00:22:06 GMT; Path=/; Domain=example.com; HttpOnly"
+    (is (string= "name4=value4; Expires=Fri, 25 Jan 2002 19:22:06 GMT; Path=/; Domain=example.com; HttpOnly"
                  (fourth headers)))))
